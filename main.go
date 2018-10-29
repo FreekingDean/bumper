@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/FreekingDean/bumper/api"
+	"github.com/FreekingDean/bumper"
 )
 
 func main() {
-	api.Start()
+	#load-config
+	#start-daemon
+	#start-api
 }
