@@ -16,7 +16,9 @@ type configuration interface {
 // Init tells the configuration engine how
 // to configure the DB
 func Init(config configuration) *service {
-	svc := &service{}
+	svc := &service{
+		path: 
+	}
 	config.AddOption("path", DATABASE_PATH)
 }
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/FreekingDean/bumper/configuration"
-	"github.com/FreekingDean/bumper/storage"
+	"github.com/FreekingDean/bumper/database"
 	"github.com/spf13/pflag"
 )
 
