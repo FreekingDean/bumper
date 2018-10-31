@@ -7,30 +7,36 @@ import (
 
 type service struct {
 	db *sql.DB
+
+	config configuration
 }
 
 type configuration interface {
 	BindOption(string, interface{}, interface{})
+	GetString(string) String
 }
 
 // Init tells the configuration engine how
 // to configure the DB
 func Init(config configuration) *service {
-	svc := &service{}
-	config.AddOption("path", DATABASE_PATH)
-}
-
-func Open() (*Database, error) {
-	db, err := sql.Open("sqlite3", DATABASE_PATH)
-	if err != nil {
-		return nil, err
+	svc := &service{
+		config: config,
 	}
-	return &Database{
-		db: db,
-	}, nil
+	var path string
+	config.AddOption("path", DATABASE_PATH)
+	return svc
 }
 
-func (d *Database) Close() {
+func (svc *service) Start() error {
+	db, err := sql.Open("sqlite3", svc.config.GetString("path"))
+	if err != nil {
+		return err
+	}
+	svc.db = db
+	return nil
+}
+
+func (d *Database) Stop() {
 	d.Close()
 }
 

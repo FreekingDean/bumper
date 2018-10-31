@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/FreekingDean/bumper/configuration"
-	"github.com/FreekingDean/bumper/storage"
+	"github.com/FreekingDean/bumper/database"
 	"github.com/spf13/pflag"
 )
 
 // Four step approach into running the services:
-// Init -> Configure -> Start -> Stop
+// Init -> Start -> Stop
 // This allows us to allow packages to build their
 // own configuration options.
 func main() {
@@ -15,15 +15,18 @@ func main() {
 	config.AddSource(configuration.DefaultFlagSource)
 	config.AddSource(configuration.DefaultFileSource)
 
-	sotrageConfig := config.AddConfiguration("storage")
-	store := storage.Init(storageConfig)
-	config.AddSource(store)
+	databaseConfig := config.AddConfiguration("database")
+	database := database.NewDatabase(storageConfig)
+	config.AddSource(database)
+
 	config.Init()
 
-	err := config.Configure()
-	err := store.Configure()
+	err := config.Start()
+	err := database.Start()
 	//start-daemon
 	//start-api
+	database.Stop()
+	config.Stop()
 }
 
 func printUsage() {
