@@ -5,6 +5,10 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+const (
+	defaultDatabasePath = "/var/lib/bumper/db.sqlite"
+)
+
 type service struct {
 	db *sql.DB
 
@@ -12,7 +16,7 @@ type service struct {
 }
 
 type configuration interface {
-	BindOption(string, interface{}, interface{})
+	AddOption(string, interface{})
 	GetString(string) String
 }
 
@@ -22,7 +26,7 @@ func Init(config configuration) *service {
 	svc := &service{
 		config: config,
 	}
-	config.AddOption("path", DATABASE_PATH)
+	config.AddOption("path", defaultDatabasePath)
 	return svc
 }
 

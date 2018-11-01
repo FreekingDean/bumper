@@ -3,26 +3,26 @@
 package configuration
 
 const (
-	// TopLevelKey indicates it has no parent
-	TopLevelKey = "-"
+	defaultConfigPath = "/etc/bumper/bumper.conf"
 )
 
 // Configuration is the domain object that holds all loaded configuration
 // information
 type configuration struct {
-	Values map[string]Value
+	values map[string]value
 }
 
-type Value struct {
+type value struct {
 	Data   interface{}
-	Source Source
+	Source source
 }
 
-// Service holds all the nesecary information to use configuration
-type Service struct {
-	global map[string]Configuration
+type source interface{}
 
-	self Configuration
+type service struct {
+	global map[string]*configuration
+
+	self *configuration
 }
 
 // Source allows configuration to load conifguration
@@ -32,21 +32,28 @@ type source interface {
 
 // Init creates a new configuration service as well as
 // adds options for itself.
-func Init() *Service {
-	self := config.AddConfiguration(NewConfiguration(config, "configuration", nil))
-	self.AddOption()
-
+func Init() *service {
 	svc := &service{
-		global: map[string]Configuration{},
+		global: map[string]*configuration{},
 	}
-	svc.AddConfiguration
+
+	self := svc.AddConfiguration("config")
+	svc.self = self
+
+	self.AddOption("path", defaultConfigPath)
+	return svc
 }
 
 // AddConfiguration adds a new configuration to the parent
-func (service *Service) AddConfiguration(key string) *configuration {
-	newConfig := &configuration{
-		values: make(map[string]Value),
+func (service *service) AddConfiguration(key string) *configuration {
+	if config, ok := service.global[key]; ok {
+		return config
 	}
+
+	newConfig := &configuration{
+		values: make(map[string]value),
+	}
+
 	service.global[key] = newConfig
 	return newConfig
 }
