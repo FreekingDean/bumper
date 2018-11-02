@@ -8,55 +8,64 @@ const (
 
 // Configuration is the domain object that holds all loaded configuration
 // information
-type configuration struct {
-	values map[string]value
+type Configuration struct {
+	Values map[string]*Value
 }
 
-type value struct {
-	Data   interface{}
-	Source source
+// Value holds the type of data in memory
+type Value struct {
+	Data    interface{}
+	Default interface{}
+	Source  Source
 }
 
-type source interface{}
+// Service is the confiugration service that allows for loading
+// and retreiving data
+type Service struct {
+	Global map[string]*Configuration
 
-type service struct {
-	global map[string]*configuration
-
-	self *configuration
+	Self *Configuration
 }
 
 // Source allows configuration to load conifguration
-type source interface {
+type Source interface {
 	StoreConfiguration(key string, value string) error
 }
 
 // Init creates a new configuration service as well as
 // adds options for itself.
-func Init() *service {
-	svc := &service{
-		global: map[string]*configuration{},
+func Init() *Service {
+	svc := &Service{
+		Global: map[string]*Configuration{},
 	}
 
 	self := svc.AddConfiguration("config")
-	svc.self = self
+	svc.Self = self
 
 	self.AddOption("path", defaultConfigPath)
 	return svc
 }
 
 // AddConfiguration adds a new configuration to the parent
-func (service *service) AddConfiguration(key string) *configuration {
-	if config, ok := service.global[key]; ok {
+func (service *Service) AddConfiguration(key string) *Configuration {
+	if config, ok := service.Global[key]; ok {
 		return config
 	}
 
-	newConfig := &configuration{
-		values: make(map[string]value),
+	newConfig := &Configuration{
+		Values: make(map[string]*Value),
 	}
 
-	service.global[key] = newConfig
+	service.Global[key] = newConfig
 	return newConfig
 }
 
-func (config *configuration) AddOption(key string, defaultValue interface{}) {
+// AddOption adds an option to a configuration
+func (config *Configuration) AddOption(name string, defaultValue interface{}) {
+	if _, ok := config.Values[name]; ok {
+		config.Values[name].Default = defaultValue
+	}
+	config.Values[name] = &Value{
+		Default: defaultValue,
+	}
 }
