@@ -9,38 +9,23 @@ const (
 	defaultDatabasePath = "/var/lib/bumper/db.sqlite"
 )
 
-type service struct {
+type Database struct {
 	db *sql.DB
-
-	config configuration
 }
 
-type configuration interface {
-	AddOption(string, interface{})
-	GetString(string) String
-}
-
-// Init tells the configuration engine how
-// to configure the DB
-func Init(config configuration) *service {
-	svc := &service{
-		config: config,
-	}
-	config.AddOption("path", defaultDatabasePath)
-	return svc
-}
-
-func (svc *service) Start() error {
-	db, err := sql.Open("sqlite3", svc.config.GetString("path"))
+func NewDatabase(path string) (*Database, error) {
+	db, err := sql.Open("sqlite3", path)
 	if err != nil {
 		return err
 	}
-	svc.db = db
-	return nil
+
+	return &Database{
+		db: db,
+	}
 }
 
-func (d *Database) Stop() {
-	d.Close()
+func (d *Database) Close() {
+	d.db.Close()
 }
 
 func (d *Database) Store(statement string, data ...interface{}) error {
