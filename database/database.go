@@ -16,12 +16,12 @@ type Database struct {
 func NewDatabase(path string) (*Database, error) {
 	db, err := sql.Open("sqlite3", path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	return &Database{
 		db: db,
-	}
+	}, nil
 }
 
 func (d *Database) Close() {
